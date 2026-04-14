@@ -1,98 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cost Calculator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Care Cost & Insurance Calculator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; }
+    .hero { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); }
+    .btn-primary { background: #2563eb; }
+    .btn-primary:hover { filter: brightness(1.1); }
+    select, input[type=number] {
+      width: 100%; padding: 10px 14px; border: 1.5px solid #e5e7eb;
+      border-radius: 10px; font-size: 15px; outline: none;
+      transition: border-color .2s;
+    }
+    select:focus, input[type=number]:focus { border-color: #2563eb; }
+    .result-row { display: flex; justify-content: space-between; align-items: center;
+                   padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+    .result-row:last-child { border-bottom: none; }
+    .result-label { color: #6b7280; font-size: 14px; }
+    .result-value { font-weight: 700; font-size: 18px; color: #111827; }
+    .result-highlight { color: #2563eb; }
+    .card { background: white; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.08);
+              padding: 32px; margin-bottom: 20px; }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen py-12 px-4">
-    <div class="max-w-2xl mx-auto">
-        <div class="bg-white rounded-lg shadow-xl p-8">
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2">Cost Calculator</h1>
-                <p class="text-gray-600 text-lg">Calculate cost of pet care including insurance savings or costs</p>
-            </div>
+<body class="bg-gray-50 min-h-screen">
+  <div class="hero text-white py-12 px-4 text-center mb-10">
+    <h1 class="text-3xl sm:text-4xl font-extrabold mb-2">Pet Care Cost & Insurance Calculator</h1>
+    <p class="text-white/80 text-lg max-w-xl mx-auto">Select your pet, procedure, and insurance provider to see real cost estimates and what you'd pay out-of-pocket.</p>
+  </div>
+  <div class="max-w-2xl mx-auto px-4 pb-20">
+    
+<div class="card">
+  <h2 class="text-xl font-bold text-gray-900 mb-6">Pet Procedure Cost &amp; Insurance Estimator</h2>
 
-            <!-- Formula Description -->
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
-                <p class="text-blue-900 text-sm"><strong>How it works:</strong> ROI = (Gain ÷ Investment) × 100</p>
-            </div>
+  <div class="mb-5">
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Pet Type</label>
+    <select id="petType" onchange="updateProcedures()">
+      <option value="dog">Dog</option>
+      <option value="cat">Cat</option>
+      <option value="rabbit">Rabbit</option>
+      <option value="bird">Bird</option>
+    </select>
+  </div>
 
-            <!-- Input Form -->
-            <form id="calculator-form" class="mb-8">
-                
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Investment Amount ($)</label>
-                <input
-                    type="number"
-                    id="investment"
-                    value="10000"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="Investment Amount ($)"
-                >
-            </div>
-            
-            <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Expected Gain ($)</label>
-                <input
-                    type="number"
-                    id="gain"
-                    value="15000"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="Expected Gain ($)"
-                >
-            </div>
-            
-                <button
-                    type="button"
-                    onclick="calculate()"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
-                >
-                    Calculate
-                </button>
-            </form>
+  <div class="mb-5">
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Procedure / Service</label>
+    <select id="procedure"></select>
+  </div>
 
-            <!-- Result Display -->
-            <div id="result-container" class="hidden bg-green-50 border-l-4 border-green-500 p-6 rounded">
-                <p class="text-green-900 text-sm font-semibold mb-2">Your Result:</p>
-                <p class="text-4xl font-bold text-green-600" id="result-value">--</p>
-                <p class="text-green-800 text-sm mt-2">Expected ROI (%)</p>
-            </div>
+  <div class="mb-5">
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Insurance Provider</label>
+    <select id="insurance" onchange="toggleDeductible()">
+      <option value="none">No Insurance</option>
+      <option value="trupanion">Trupanion</option>
+      <option value="healthypaws">Healthy Paws</option>
+      <option value="embrace">Embrace</option>
+      <option value="nationwide">Nationwide</option>
+      <option value="lemonade">Lemonade Pet</option>
+      <option value="aspca">ASPCA Pet Insurance</option>
+    </select>
+  </div>
 
-            <!-- Info Section -->
-            <div class="mt-12 pt-8 border-t border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">About Pet Care</h3>
-                <p class="text-gray-600 leading-relaxed">
-                    This calculator is designed to help you make informed decisions about pet care investments and strategies. Use it to estimate potential outcomes and optimize your approach.
-                </p>
-            </div>
-        </div>
+  <div id="deductibleRow" class="mb-5 hidden">
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Annual Deductible ($)</label>
+    <input type="number" id="deductible" value="250" min="0" max="1000" step="50">
+    <p class="text-xs text-gray-400 mt-1">Amount you pay each year before insurance kicks in</p>
+  </div>
+
+  <button onclick="calculate()"
+    class="btn-primary text-white font-bold py-3 px-8 rounded-xl w-full mt-2 cursor-pointer transition text-base">
+    Calculate My Cost →
+  </button>
+</div>
+
+<div id="results" class="card hidden">
+  <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Your Estimate</h3>
+  <div class="result-row">
+    <span class="result-label">Procedure cost (typical range)</span>
+    <span class="result-value" id="r-range">—</span>
+  </div>
+  <div class="result-row">
+    <span class="result-label">Average procedure cost</span>
+    <span class="result-value" id="r-avg">—</span>
+  </div>
+  <div id="ins-rows" class="hidden">
+    <div class="result-row">
+      <span class="result-label">Monthly insurance premium (est.)</span>
+      <span class="result-value" id="r-premium">—</span>
     </div>
+    <div class="result-row">
+      <span class="result-label">Insurance covers</span>
+      <span class="result-value" id="r-covers">—</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Insurance reimbursement (this visit)</span>
+      <span class="result-value result-highlight" id="r-reimburse">—</span>
+    </div>
+    <div class="result-row" style="background:#f0fdf4; border-radius:8px; padding:12px;">
+      <span class="result-label font-semibold text-green-800">Your out-of-pocket</span>
+      <span class="result-value result-highlight" id="r-oop">—</span>
+    </div>
+  </div>
+  <p id="r-note" class="text-xs text-gray-400 mt-4"></p>
+</div>
 
-    <script>
-        function calculate() {
-            try {
-                
-        const investment = parseFloat(document.getElementById('investment').value) || 0;
-        const gain = parseFloat(document.getElementById('gain').value) || 0;
-        const result = investment > 0 ? ((gain / investment) * 100).toFixed(2) : 0;
-        
-                document.getElementById('result-value').textContent = result;
-                document.getElementById('result-container').classList.remove('hidden');
-            } catch(e) {
-                alert('Please enter valid numbers');
-            }
-        }
+<div class="card bg-blue-50 border border-blue-100">
+  <h3 class="font-semibold text-blue-900 mb-2">💡 About these estimates</h3>
+  <p class="text-sm text-blue-800">Costs vary by geography, clinic, and your pet's health. Urban vets typically charge 20–40% more than rural ones. Always call ahead for an estimate. Insurance premiums shown are national averages for a healthy adult pet.</p>
+</div>
 
-        // Allow Enter key to trigger calculation
-        document.getElementById('calculator-form').addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                e.preventDefault();
-                calculate();
-            }
-        });
-    </script>
+<script>
+const COSTS = {
+  dog: {
+    "Annual Wellness Exam":      {min:50,  max:250,  avg:130},
+    "Core Vaccines":             {min:75,  max:200,  avg:140},
+    "Dental Cleaning":           {min:300, max:1200, avg:650},
+    "Spay / Neuter":             {min:200, max:800,  avg:450},
+    "Emergency Visit":           {min:300, max:2500, avg:900},
+    "X-Ray / Imaging":           {min:150, max:500,  avg:280},
+    "Blood Work Panel":          {min:100, max:300,  avg:180},
+    "Heartworm Test+Prevention": {min:100, max:250,  avg:160},
+    "Minor Surgery":             {min:500, max:2500, avg:1200},
+    "Major Surgery":             {min:1500,max:10000,avg:4200},
+    "Flea & Tick Treatment":     {min:30,  max:120,  avg:65},
+    "Allergy Testing":           {min:200, max:800,  avg:450},
+  },
+  cat: {
+    "Annual Wellness Exam":      {min:50,  max:200,  avg:100},
+    "Core Vaccines":             {min:50,  max:150,  avg:90},
+    "Dental Cleaning":           {min:200, max:800,  avg:400},
+    "Spay / Neuter":             {min:150, max:600,  avg:300},
+    "Emergency Visit":           {min:200, max:2000, avg:700},
+    "X-Ray / Imaging":           {min:100, max:400,  avg:220},
+    "Blood Work Panel":          {min:80,  max:250,  avg:150},
+    "Flea & Tick Treatment":     {min:25,  max:100,  avg:55},
+    "Minor Surgery":             {min:400, max:2000, avg:900},
+    "Major Surgery":             {min:1000,max:8000, avg:3200},
+    "Urinary / Kidney Care":     {min:200, max:1500, avg:600},
+  },
+  rabbit: {
+    "Annual Wellness Exam":      {min:40,  max:150,  avg:75},
+    "Spay / Neuter":             {min:150, max:600,  avg:300},
+    "Dental Filing":             {min:100, max:400,  avg:200},
+    "Emergency Visit":           {min:150, max:1500, avg:500},
+    "X-Ray / Imaging":           {min:100, max:350,  avg:200},
+    "GI Stasis Treatment":       {min:200, max:1500, avg:600},
+    "Nail Trim":                 {min:10,  max:30,   avg:18},
+  },
+  bird: {
+    "Annual Wellness Exam":      {min:50,  max:200,  avg:100},
+    "Wing / Nail Clip":          {min:20,  max:60,   avg:35},
+    "Emergency Visit":           {min:100, max:1000, avg:350},
+    "X-Ray / Imaging":           {min:80,  max:300,  avg:160},
+    "Feather / Skin Issue":      {min:100, max:500,  avg:250},
+    "Blood Work Panel":          {min:60,  max:200,  avg:120},
+  },
+};
+
+const INS = {
+  trupanion:  {monthly:{dog:65,cat:45,rabbit:30,bird:25}, reimburse:0.90, deductible:"Per-condition",  wellness:false, note:"No payout limits; deductible per condition, not annual"},
+  healthypaws:{monthly:{dog:55,cat:38,rabbit:0, bird:0},  reimburse:0.80, deductible:"Annual",         wellness:false, note:"Unlimited lifetime benefit; no caps"},
+  embrace:    {monthly:{dog:60,cat:40,rabbit:35,bird:30}, reimburse:0.80, deductible:"Annual",         wellness:true,  wellnessAmt:200, note:"Diminishing deductible; covers wellness add-on"},
+  nationwide: {monthly:{dog:52,cat:36,rabbit:30,bird:28}, reimburse:0.70, deductible:"Annual",         wellness:true,  wellnessAmt:150, note:"Covers alternative therapies and behavioral issues"},
+  lemonade:   {monthly:{dog:30,cat:25,rabbit:22,bird:20}, reimburse:0.80, deductible:"Annual",         wellness:false, note:"Lowest premiums; AI-powered claims processing"},
+  aspca:      {monthly:{dog:48,cat:33,rabbit:28,bird:24}, reimburse:0.80, deductible:"Annual",         wellness:true,  wellnessAmt:100, note:"Covers behavioral therapy and exam fees"},
+};
+
+const WELLNESS_PROCS = ["Annual Wellness Exam","Core Vaccines","Heartworm Test+Prevention","Flea & Tick Treatment","Wing / Nail Clip","Nail Trim"];
+
+function updateProcedures() {
+  const pet = document.getElementById('petType').value;
+  const sel = document.getElementById('procedure');
+  sel.innerHTML = '';
+  Object.keys(COSTS[pet]).forEach(p => {
+    const o = document.createElement('option');
+    o.value = p; o.textContent = p;
+    sel.appendChild(o);
+  });
+}
+
+function toggleDeductible() {
+  const ins = document.getElementById('insurance').value;
+  document.getElementById('deductibleRow').classList.toggle('hidden', ins === 'none');
+}
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+
+function calculate() {
+  const pet  = document.getElementById('petType').value;
+  const proc = document.getElementById('procedure').value;
+  const ins  = document.getElementById('insurance').value;
+  const ded  = parseFloat(document.getElementById('deductible').value) || 0;
+
+  const cost = COSTS[pet][proc];
+  if (!cost) return;
+
+  document.getElementById('r-range').textContent = fmt(cost.min) + ' – ' + fmt(cost.max);
+  document.getElementById('r-avg').textContent   = fmt(cost.avg);
+
+  const insRows = document.getElementById('ins-rows');
+  const rNote   = document.getElementById('r-note');
+
+  if (ins === 'none') {
+    insRows.classList.add('hidden');
+    rNote.textContent = 'Add insurance details above to see reimbursement estimates.';
+  } else {
+    insRows.classList.remove('hidden');
+    const plan = INS[ins];
+    const monthly = plan.monthly[pet] || 0;
+    const isWellness = WELLNESS_PROCS.includes(proc);
+    const covered = !isWellness || plan.wellness;
+
+    document.getElementById('r-premium').textContent = monthly ? fmt(monthly) + '/mo' : 'Not available for this pet type';
+
+    if (!covered) {
+      document.getElementById('r-covers').textContent = 'This procedure (wellness/preventive) — ✗ Not covered';
+      document.getElementById('r-reimburse').textContent = '$0';
+      document.getElementById('r-oop').textContent = fmt(cost.avg);
+      rNote.textContent = 'Wellness visits and preventive care are not covered by this plan. ' + plan.note;
+    } else {
+      const afterDed    = Math.max(0, cost.avg - ded);
+      const reimbursed  = afterDed * plan.reimburse;
+      const wellnessAdd = (isWellness && plan.wellness) ? (plan.wellnessAmt || 0) : 0;
+      const totalReimb  = Math.min(reimbursed + wellnessAdd, cost.avg);
+      const oop         = Math.max(0, cost.avg - totalReimb);
+
+      document.getElementById('r-covers').textContent  = 'This procedure — ✓ Covered';
+      document.getElementById('r-reimburse').textContent = fmt(totalReimb);
+      document.getElementById('r-oop').textContent     = fmt(oop);
+      rNote.textContent = plan.note + ' | Deductible type: ' + plan.deductible + '. Estimate assumes deductible already met for annual plans.';
+    }
+  }
+
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+updateProcedures();
+</script>
+
+  </div>
+  <footer class="text-center text-gray-400 text-sm py-8">
+    &copy; 2026 Pet Care Cost & Insurance Calculator. All estimates are for informational purposes.
+  </footer>
 </body>
 </html>
